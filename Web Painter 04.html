@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<!--
+Great work so far - this tutorial builds on all the work done you've completed so far and provides an excellent starting point to try to solve some more complex problems assocated with the canvas.  Before you start - don't forget to enable the console
+
+How did you get on with the previous tutorial? Did you manage to solve the problem with position and alignment?
+If you didn't, the issue is because the height and width of the canvas needs to really be set using the HTML attributes rather than the CSS.  After you completed a lot of research on canvas you would have discovered that a “canvas” has 2 sizes, the internal dimensions of the canvas (its drawing buffer) and its display size.  CSS only alters the size being displayed!  This means that by only setting the “display” size the canvas element will try to blend the both values (display and drawing space) into one (the effect is that the further away from 0 the mouse attempts to draw the larger the difference between the drawing point and the mouse pointer).  To quickly resolve this issue, the number of pixels should be set using the canvas attributes in HTML.
+
+To fix the problem, simple update the line:
+    <canvas id="cnCanvas" onmousemove="fnTrackMouse(event);">
+With:
+    <canvas id="cnCanvas" onmousemove="fnTrackMouse(event);" width="500" height="500">
+
+Or, another fix would be to simply add the specific sizes after creating the JavaScript reference to the canvas (this will cause JavaScript to reset the element to a specific size):
+oCanvas = document.getElementById("cnCanvas");
+    oCanvas.width=500;
+    oCanvas.height=500;
+
+A fully complete solution could include aspect (CSS, HTML and JavaScript) were given each the correct values so that they were all configured to the same standard.
+
+
+Let’s review what happened?
+    This challenge was specifically setup to give you an opportunity to see how you deal with problems that are not always obvious (despite being very simple to fix - which is actually a really useful lesson; challenge does not always mean difficult, but it could be time consuming!)
+
+    Did you stop at the task 5 (Make sure your paint marks are located directly below your mouse) because you couldn’t fully complete it? Or, did you do the best you could on that one and move on to attempt the others?  Which option (out of those) was the “best” one and why?
+
+Important (VERY important):
+    If you tried, couldn’t solve it and just stopped at that task - this is terrible news!! Please remember this is ALL about problem solving, if you couldn’t complete that specific task fully, simply do the best you can (and yes this absolutely includes lots of time researching, testing and trying to find a workable solution).  Then once its at the best place you can get it, move on and try the next task. Failure to try to complete everything will significantly impact your ability to PASS this module; even if one thing is not complete or working correctly if you give up at that point (because “that” one was too challenging) you will lose out on lots of other potential marks.
+
+    Don’t forget, your first word of the day was ‘Paradigm Shift’ meaning to describe a fundamental change in your approach of thinking in order to solve a problem.  A good way to approach problems like this (e.g. if a solution is not obvious) is look at as many working samples of code that uses the same type of elements or functions (in this instance, canvas, mouse tracking and painting at specific coordination’s and sizes) and try to identify common patterns in how they work or are set up.  Once you have got some ideas - create a number of tests to see how yours differs (this is an analysis of the differences which should give you potential pointers that can be used to refine your research or testing until you have found and understood the problem and can create or apply a fix).
+
+Let’s reflect for a moment -
+    Did you give up? If so, Why?
+    Have you become dependent on us giving you an answer? If so, is that a good long-term strategy?
+    If the first lecture (01) we discussed finding and using online resources, we have even (for nearly every starting task) asked to you review online for more information - why do you think this has been a predominant theme?
+
+
+
+
+This tutorial includes the ability to paint and introduces two colour selector tools (not buttons), one is even partially functional!
+
+
+We are introducing some new techniques in this tutorial, okay the first couple are mostly about using styling (but creating a good user interface is helpful) -
+1. Okay, this has nothing to do with "programming" but it should help you 'see' the issue with Task 3; in essence we have added an additional style element to the canvas to change
+    the mouse pointer when the user moves the mouse on to it (we set cursor to crosshair) - for examples of different types check https://www.w3schools.com/css/tryit.asp?filename=trycss_cursor
+2. We have added an ID (id=toolsContainer) to the HTML div(division) so that we can apply some styling, particually set its placement - take a look in the style section for the
+    ID=toolsContainer, it is using "position: relative"; technically any elements that are relatively positioned means their positioned is computed relative to the previous element (basically is says - compute its position to where it is).  Okay, now your thinking, why do we need to compute a position if it is ust putting it where it already is!! A good
+    point - expect, now the browser 'remembers' it position which is really helpful when we want to specifically place other element within.  We can now use "position: absolute" on
+    elements like colourSelector1 (see both the style and HTML section), basically objects placed within "toolsContainer" now see left: 0 and top: 0 not as the very top of the entire
+    page, but the top,left hand corner of the toolsContainer division (this is a really nice way to allow us to easily set the position of sub elements; like colour selectors).
+3. Instead of using buttons we will try using blocks of colour, blocks can be made very easily out of HTML "div" elements; doing this will help make the interface a little nicer; plus
+    can still capture click (but no the graphic does seem to pop in/out). An example called: colourSelector1 is shown below.
+4. Within the script comments is a very small statement about local and global variables
+
+
+An important note and something to think about:
+    We have introduced a IF instruction in the mouse tracking function to detect whether the button is pressed; however try to answer the question:
+    Last Session Question: Why does the alert about the mouse button being pressed only happen if I am holding the button and moving the mouse?
+    Answer: The system initially detects the mousemove, then and only then will the IF left button detected instruction be executed - meaning the mouse needs to move first
+
+    Strings-In-String: You will likely run into a common problem when dealing with (specifically task 5).  Lets take a look at some code:
+        onclick="fnActivateColour('#00ff00');"
+    We are all used to seeing the instruction: onclick="..."
+    in essence, this is creating a "string" that will be executed as a JavaScript instruction, eg. "fnActivateColour();" meaning when clicked execute this function (easy!)
+    the problem here is that, our function (fnActivateColour) also includes a "string"; e.g. fnActivateColour("#00ff00");
+    strings are specified using " ", the first defines the start and the second defines the end of the string.
+    Lets take another look:
+        onclick="fnActivateColour("#00ff00");"
+    the string starts "fn..
+    but the string ends at ..our("
+    when it should end at ..);"
+    the problem is that the browser doesnt know the difference - so we need to make it clear by using a different marker 'string'  (not single quote not double!)
+    as long as WE are consistent the browser can now clearly see the differenceL
+        onclick="fnActivateColour('#00ff00');"
+    we can use the double quote for the outer string and the single quote for the inner string - or equally correct we could:
+        onclick='fnActivateColour("#00ff00");'
+    You can do this by protecting the quote but that a little more complicated so lets not worry about that now!!
+
+
+
+
+Tasks:
+    1. Spend some time reviewing this code - try to make sure you understand what is happening and why.
+    2. Get this program running in Chrome and test it; make sure you have enabled the console and can see the "Debug Messages".
+    3. Check whether the painting effect is exactly where you think it should be; we dont think it is exactly in the right place - can you fix it? Hint! consider thinking
+        about off-setting the painting position to better align with the mouse position (its not a big ajustment)
+    4. Extend the program so that the fnActivateColour function actually changes the paint colour rather than simply saying	"Activated Colour..."; to do this create a GLOBAL variable
+        called sPaintColour and set its initial value to "#ff0000"; update the fnPaintStylus function to use the sPaintColour so that any change to the variable will effect the
+        paint colour
+    5. Further extend the program by adding 2 more colour selector and getting all 4 to work as colour changers; dont forget to re-read the important notes section above on
+        Strings-In-String
+-->
+
+<head>
+    <title>Web Painter Ex4</title>
+    <style>
+        #cnCanvas {
+            /*
+                the "#cnCanvas" at the start of this block is called the 'selector' - it is used to target the element that this style will be applied to.
+                the "#" tells the browser to target using the element's ID, in this case it is saying "apply this style block to the element with the ID=cnCanvas.
+            */
+            /* width: 500px; -- this line has been removed, see the comments below the canvas element for more details */
+            /* height: 500px; -- this line has been removed, see the comments below the canvas element for more details */
+            border: 1px solid #000000;
+            background-color: #f0f0f0;
+            cursor: crosshair;
+        }
+
+        #toolsContainer {
+            position: relative;
+        }
+
+        #colourSelector {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width: 50px;
+            height: 50px;
+            background-color: #00ff00;
+            border: 2px solid #000000;
+        }
+
+        .colorSelect {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width: 50px;
+            height: 50px;
+            border: 2px solid #000000;
+        }
+
+    </style>
+
+    <script>
+        //declare a variable, a variable can be used to hold information - this variable will be used to hold the HTML canvas and its context (we will be setting it to 2D)
+        //because these variables are outside any functions they are called GLOBAL and are available anywhere in the program
+        //variables declared into a function is called LOCAL and is only available in that function - we will discuss this in more detail during a future lecture
+        var oCanvas;
+        var iXPos, iYPos; //declare two variables, these variables will be used to hold the stylus X and Y position
+        var penSize = 5;
+        var sPaintColor = "#00ff00";
+
+        function fnDebugMessage(sMessage) {
+            //this function is used to send messages to the console - this is easier than using the alert() function as is doesnt mean the user has to press a button to continue
+            console.log("Debug Message: " + sMessage);
+        }
+
+        function fnInitialise() {
+            fnDebugMessage("Running fnInitialise"); //debug message, if this message appears in the console we know that all the previous instructons were executed
+
+            oCanvas = document.getElementById("cnCanvas");
+
+            if (oCanvas.getContext) { //if we can get the canvas' context execute the following
+                oCanvasContext = oCanvas.getContext("2d"); //set the context to 2D, that way we are dealing with X and Y positions
+                fnDebugMessage("Canvas has been set to 2D"); //debug message, if this message appears in the console we know that all the pr
+
+                //initialise both the variables used to hold the X and Y position of the stylus to 0
+                iXPos = 0;
+                iYPos = 0;
+
+                //set the canvas buffer to the correct size - this is done automatically if we set the HTML <canvas> width and height rather that via CSS
+                oCanvas.width = 500;
+                oCanvas.height = 500;
+            }
+        }
+
+        function updatePenSize() {
+            const element = document.getElementById("penSize");
+            if (element.value <= 0) {
+                penSize = 1;
+                element.value = 1;
+                return;
+            }
+            penSize = element.value;
+        }
+
+        function fnPaintStylus() {
+            //this function will be used to paint a stylus on the canvas - a bit like a mouse pointer
+            //the stylus will be painted and the X and Y position
+            fnDebugMessage("Painting At: x: " + iXPos + ", y: " + iYPos); //show the mouse position
+            oCanvasContext.fillStyle = sPaintColor;
+            oCanvasContext.fillRect(iXPos, iYPos, penSize, penSize); //fillRect() method (function) draws a "filled" rectangle; default color black.
+        }
+
+        function fnTrackMouse(e) {
+            //this function is called "everytime" the user's mouse is moved when over the associated element (in this case the canvas)
+            //we have also added the ability for it to accept a parameter (called e, actually we can call it anything but as event is a reserved work "e" makes some sense
+            //Set the offset for the mouse
+            const rect = oCanvas.getBoundingClientRect();
+            iXPos = e.clientX - rect.left; //store the current mouse positionX in the X variable
+            iYPos = e.clientY - rect.top; //store the current mouse positionY in the Y variable
+
+            fnDebugMessage("Mouse Tracking: x: " + iXPos + ", y: " + iYPos); //show the mouse position
+
+            if (e.buttons == 1) {
+                //this tests the button property (see https://developer.mozilla.org/en-US/docs/Web/Events/mousemove for more information) to see if its TRUE
+                fnPaintStylus(); //the mouse is moving and the left button has been detected, lets start some painting
+            }
+        }
+
+    </script>
+</head>
+
+<body onload="fnInitialise();">
+<h1>Alex's super amazing, copywritten paint program that no one could ever ever recreate.</h1>
+<!-- everything in the body section is rendered on the page; in essence this is the "user interface" -->
+<div>
+    <!-- this container can be used to hold the canvas, techncally this is not needed but its good practice -->
+    <canvas id="cnCanvas" onmousemove="fnTrackMouse(event);" width="500" height="500">
+        <!--
+            by adding "event" to the function call means that we will be able to access mouse and keyboard information, really useful!!
+            it is best practice to set the size of the canvas using the width="xx" and height="xx" because by default, if not specified the
+            size will be 300px x 150px and any drawing will be scaled during the render to fit the size - but if (as you may have found) CSS
+            doesnt respect the ratio the images appear distorted - therefore the simplist fix: set the sizes via the HTML attributes width and height
+            rather than via CSS
+        -->
+    </canvas>
+</div>
+
+<div id="toolsContainer">
+    <!-- this container can be used to group all the user's tools -->
+    <div id="colorSelect" onclick="fnActivateColour('#00ff00');">Green</div>
+    <div id="colorSelect" onclick="fnActivateColour('#ff0000')">Red</div>
+    <div name="colorSelect" onclick="fnActivateColour('#0000ff')">Blue</div>
+
+    <label for="colorPicker">Color Picker: </label>
+    <input type="color" value="#00ff00" id="colorPicker">
+    <br/>
+    <label for="penSize">Pen Size: </label>
+    <input type="number" value="5" id="penSize" onchange="updatePenSize()">
+</div>
+</body>
+</html>

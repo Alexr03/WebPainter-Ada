@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<!--
+Great work so far - this tutorial builds on all the work done you've completed so far and provides an excellent starting point to try to solve some of the problems assocated with the coursework.
+
+We are introducing some new techniques in this tutorial -
+1. event - the JavaScript keyword "event" (keywords were discussed in the previous lecture) is a reserved word that allows the programmer to get information about whats happening with regards to the mouse and/or keyboard.
+    for more information on "events" please review https://developer.mozilla.org/en-US/docs/Web/API/Event
+2. clientX - this is a read only property (value) associated with the horizontal position of the "event" (covered above - specifically the mouseevent data of event)
+    for more information on this (and the other properties please review: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/clientX
+3. If you have issues with matching coordinates search "mouse coordinates and canvas coordinates not matching" only for possible published articles
+
+
+An important note and something to think about:
+    We have introduced a IF instruction in the mouse tracking function to detect whether the button is pressed; however try to answer the question:
+    Why does the alert about the mouse button being pressed only happen if I am holding the button and moving the mouse?
+
+
+Tasks:
+    1. Spend some time reviewing this code - try to make sure you understand what is happening and why.
+    2. Get this program running in Chrome and test it; make sure you have enabled the console and can see the "Debug Messages".
+    3. Test what happens when you move the mouse over the canvas and press the left button.
+    4. We have reintroduced the function fnPaintStylus (from the etch-a-sketch tutorial) as it paints a small rectangle on the canvas, see if you can connect the tracking function to the painting function so that when the user presses the mouse button the system will trace the movement of the mouse while painting
+    5. Make sure your paint marks are located directly below your mouse, otherwise its hard to paint!
+    6. Add the ability to change colour
+    7. Add the ability to change brush size
+
+    Try to complete the tasks before the next session
+
+-->
+
+<head>
+    <title>Web Painter Ex3</title>
+    <style>
+        #cnCanvas {
+            /*
+                the "#cnCanvas" at the start of this block is called the 'selector' - it is used to target the element that this style will be applied to.
+                the "#" tells the browser to target using the element's ID, in this case it is saying "apply this style block to the element with the ID=cnCanvas.
+            */
+            width: 500px;
+            height: 500px;
+            border: 1px solid #000000;
+            background-color: #f0f0f0;
+        }
+    </style>
+
+    <script>
+
+        //declare a variable, a variable can be used to hold information - this variable will be used to hold the HTML canvas and its context (we will be setting it to 2D)
+        var oCanvas, oCanvasContext;
+        var iXPos, iYPos; //declare two variables, these variables will be used to hold the stylus X and Y position
+        var penSize = 5;
+
+        function fnDebugMessage(sMessage) {
+            //this function is used to send messages to the console - this is easier than using the alert() function as is doesnt mean the user has to press a button to continue
+            console.log("Debug Message: " + sMessage);
+        }
+
+
+        function fnInitialise() {
+            //set the canvas to an appropraite mode
+            fnDebugMessage("Running fnInitialise"); //debug message, if this message appears in the console we know that all the previous instructons were executed
+
+            oCanvas = document.getElementById("cnCanvas");
+            //this sets the oCanvas variable to point to the HTML canvas tag.
+            //the instruction "document.getElementByID" tells JavaScript to search the web document (this page) for the
+            //element with the specified ID; in this case it will find the canvas element.
+            //the ID provided must match the element ID used for the canvas otherwise the following instructions will
+            //not work (because the dependent information would be found, due to not being able to find the canvas).
+
+            if (oCanvas.getContext) { //if we can get the canvas' context execute the following
+                oCanvasContext = oCanvas.getContext("2d"); //set the context to 2D, that way we are dealing with X and Y positions
+                fnDebugMessage("Canvas has been set to 2D"); //debug message, if this message appears in the console we know that all the pr
+
+                //initialise both the variables used to hold the X and Y position of the stylus to 0
+                iXPos = 0;
+                iYPos = 0;
+            }
+        }
+
+        function setBackground() {
+            oCanvasContext.fillStyle = document.getElementById("colorPicker").value;
+            oCanvasContext.fillRect(0, 0, oCanvas.width, oCanvas.height);
+        }
+
+        function clearCanvas() {
+            oCanvasContext.clearRect(0, 0, oCanvas.width, oCanvas.height);
+        }
+
+        function getColor() {
+            if(document.getElementById("randomColor").checked){
+                return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+            }
+
+            return document.getElementById("colorPicker").value;
+        }
+
+        function fnPaintStylus() {
+            //this function will be used to paint a stylus on the canvas - a bit like a mouse pointer
+            //the stylus will be painted and the X and Y position
+            fnDebugMessage("Painting At: x: " + iXPos + ", y: " + iYPos); //show the mouse position
+            oCanvasContext.fillStyle = getColor();
+            oCanvasContext.beginPath();
+            oCanvasContext.arc(iXPos, iYPos, penSize, 0, 2 * Math.PI, true);
+            oCanvasContext.fill();
+        }
+
+        function updateCursor() {
+            // oCanvasContext.clearRect(0, 0, oCanvas.width, oCanvas.height);
+
+            oCanvasContext.beginPath();
+            oCanvasContext.arc(iXPos, iYPos, penSize, 0, 2 * Math.PI, true);
+            oCanvasContext.stroke();
+
+            var cutCircle = function(context, x, y, radius){
+                context.save();
+                context.globalCompositeOperation = 'destination-out';
+                context.arc(x, y, radius, 0, Math.PI*2, true);
+                context.fill();
+                context.restore();
+            };
+
+            cutCircle(oCanvasContext, iXPos, iYPos, penSize)
+        }
+
+        function updatePenSize() {
+            const element = document.getElementById("penSize");
+            if (element.value <= 0) {
+                penSize = 1;
+                element.value = 1;
+                return;
+            }
+            penSize = element.value;
+        }
+
+        function fnSprayStylus() {
+            //this function will be used to paint a stylus on the canvas - a bit like a mouse pointer
+            //the stylus will be painted and the X and Y position
+            fnDebugMessage("Spraying At: x: " + iXPos + ", y: " + iYPos); //show the mouse position
+            oCanvasContext.fillStyle = getColor();
+
+            const rect = oCanvas.getBoundingClientRect();
+            const spraySize = document.getElementById("spraySize").value;
+            const randomNumber = Math.floor(Math.random() * penSize);
+            const randomCordX = Math.floor(iXPos - rect.left * Math.random() * spraySize);
+            const randomCordY = Math.floor(iYPos - rect.top * Math.random() * spraySize);
+
+            oCanvasContext.fillRect(randomCordX, randomCordY, randomNumber, randomNumber); //fillRect() method (function) draws a "filled" rectangle; default color black.
+        }
+
+        function fnTrackMouse(e) {
+            // updateCursor();
+            //this function is called "everytime" the user's mouse is moved when over the associated element (in this case the canvas)
+            //we have also added the ability for it to accept a parameter (called e, actually we can call it anything but as event is a reserved work "e" makes some sense
+            const rect = oCanvas.getBoundingClientRect();
+            iXPos = e.clientX - rect.left; //store the current mouse positionX in the X variable
+            iYPos = e.clientY - rect.top; //store the current mouse positionY in the Y variable
+            fnDebugMessage("Mouse Tracking: x: " + iXPos + ", y: " + iYPos); //show the mouse position
+
+            if (e.buttons == 1) {
+                //this tests the button property (see https://developer.mozilla.org/en-US/docs/Web/Events/mousemove for more information) to see if its TRUE
+                // alert("Left Button Pressed!"); //issue an alert so we can test if this works
+                var tool = document.getElementById("toolOption").value;
+                if(tool === "brush"){
+                    fnPaintStylus();
+                }
+                if(tool === "spray"){
+                    fnSprayStylus();
+                }
+            }
+        }
+
+    </script>
+</head>
+
+<body onload="fnInitialise();">
+<!-- everything in the body section is rendered on the page; in essence this is the "user interface" -->
+<div>
+    <!-- this container can be used to hold the canvas, techncally this is not needed but its good practice -->
+    <canvas id="cnCanvas" onmousemove="fnTrackMouse(event);" width="500" height="500">
+        <!-- by adding "event" to the function call means that we will be able to access mouse and keyboard information, really useful!! -->
+    </canvas>
+</div>
+
+<div>
+    <!-- this container can be used to group all the user's tools -->
+    <label for="randomColor">Random Color:</label><input type="checkbox" id="randomColor">
+    <label for="colorPicker">Color Picker: </label><input type="color" value="#00ff00" id="colorPicker">
+    <label for="penSize">Pen Size: </label><input type="range" value="5" min="5" max="20" id="penSize" onchange="updatePenSize()">
+    <br/><br/>
+
+    <button onclick="setBackground()">Set Background</button>
+    <button onclick="clearCanvas()">Clear</button>
+    <br/><br/>
+
+    <label for="toolOption">Tools: </label>
+    <select id="toolOption">
+        <option value="brush">Brush</option>
+        <option value="spray">Spray</option>
+    </select>
+    <br/><br/>
+
+    <label for="spraySize">Cursor Size: </label><input type="range" id="spraySize" min="5" max="20">
+</div>
+
+</body>
+
+</html>
