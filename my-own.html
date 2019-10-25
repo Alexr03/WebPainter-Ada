@@ -45,6 +45,11 @@ Tasks:
     </style>
 
     <script>
+        function resetDrawings() {
+            drawings = [];
+        }
+
+        let drawings = [];
 
         //declare a variable, a variable can be used to hold information - this variable will be used to hold the HTML canvas and its context (we will be setting it to 2D)
         var oCanvas, oCanvasContext;
@@ -56,6 +61,17 @@ Tasks:
             console.log("Debug Message: " + sMessage);
         }
 
+        function getRandomOffset() {
+            const spraySize = document.getElementById("spraySize").value;
+
+            var randomAngle = Math.random() * 360;
+            var randomRadius = Math.random() * spraySize;
+
+            return {
+                x: Math.cos(randomAngle) * randomRadius,
+                y: Math.sin(randomAngle) * randomRadius
+            };
+        }
 
         function fnInitialise() {
             //set the canvas to an appropraite mode
@@ -79,7 +95,7 @@ Tasks:
         }
 
         function setBackground() {
-            oCanvasContext.fillStyle = document.getElementById("colorPicker").value;
+            oCanvasContext.fillStyle = getColor();
             oCanvasContext.fillRect(0, 0, oCanvas.width, oCanvas.height);
         }
 
@@ -88,39 +104,48 @@ Tasks:
         }
 
         function getColor() {
-            if(document.getElementById("randomColor").checked){
-                return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+            if (document.getElementById("randomColor").checked) {
+                return '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
             }
 
             return document.getElementById("colorPicker").value;
         }
 
-        function fnPaintStylus() {
-            //this function will be used to paint a stylus on the canvas - a bit like a mouse pointer
-            //the stylus will be painted and the X and Y position
+        function fnPaintStylus(e) {
             fnDebugMessage("Painting At: x: " + iXPos + ", y: " + iYPos); //show the mouse position
-            oCanvasContext.fillStyle = getColor();
-            oCanvasContext.beginPath();
-            oCanvasContext.arc(iXPos, iYPos, penSize, 0, 2 * Math.PI, true);
-            oCanvasContext.fill();
+
+            let drawPoint = [];
+
+            drawPoint.push(iXPos);
+            drawPoint.push(iYPos);
+            drawings.push(drawPoint);
+            insertDrawings();
         }
 
-        function updateCursor() {
-            // oCanvasContext.clearRect(0, 0, oCanvas.width, oCanvas.height);
+        function insertDrawings() {
+            console.log(drawings);
 
-            oCanvasContext.beginPath();
-            oCanvasContext.arc(iXPos, iYPos, penSize, 0, 2 * Math.PI, true);
-            oCanvasContext.stroke();
+            for (let i in drawings) {
 
-            var cutCircle = function(context, x, y, radius){
-                context.save();
-                context.globalCompositeOperation = 'destination-out';
-                context.arc(x, y, radius, 0, Math.PI*2, true);
-                context.fill();
-                context.restore();
-            };
+                i = parseInt(i);
 
-            cutCircle(oCanvasContext, iXPos, iYPos, penSize)
+                let lastX = drawings[i][0];
+                let lastY = drawings[i][1];
+
+                let currentX = drawings[i + 1][0];
+                let currentY = drawings[i + 1][1];
+
+                oCanvasContext.beginPath();
+                oCanvasContext.moveTo(lastX, lastY);
+                oCanvasContext.lineTo(currentX, currentY);
+                oCanvasContext.strokeStyle = oCanvasContext.fillStyle = getColor();
+                oCanvasContext.lineJoin = oCanvasContext.lineCap = "round";
+                oCanvasContext.lineWidth = penSize;
+                oCanvasContext.closePath();
+                oCanvasContext.stroke();
+
+                drawings.shift();
+            }
         }
 
         function updatePenSize() {
@@ -139,13 +164,12 @@ Tasks:
             fnDebugMessage("Spraying At: x: " + iXPos + ", y: " + iYPos); //show the mouse position
             oCanvasContext.fillStyle = getColor();
 
-            const rect = oCanvas.getBoundingClientRect();
-            const spraySize = document.getElementById("spraySize").value;
-            const randomNumber = Math.floor(Math.random() * penSize);
-            const randomCordX = Math.floor(iXPos - rect.left * Math.random() * spraySize);
-            const randomCordY = Math.floor(iYPos - rect.top * Math.random() * spraySize);
+            for (var i = 0; i < 2; i++) {
+                var offset = getRandomOffset();
+                var x = iXPos + offset.x, y = iYPos + offset.y;
 
-            oCanvasContext.fillRect(randomCordX, randomCordY, randomNumber, randomNumber); //fillRect() method (function) draws a "filled" rectangle; default color black.
+                oCanvasContext.fillRect(x, y, penSize, penSize);
+            }
         }
 
         function fnTrackMouse(e) {
@@ -161,10 +185,10 @@ Tasks:
                 //this tests the button property (see https://developer.mozilla.org/en-US/docs/Web/Events/mousemove for more information) to see if its TRUE
                 // alert("Left Button Pressed!"); //issue an alert so we can test if this works
                 var tool = document.getElementById("toolOption").value;
-                if(tool === "brush"){
-                    fnPaintStylus();
+                if (tool === "brush") {
+                    fnPaintStylus(e);
                 }
-                if(tool === "spray"){
+                if (tool === "spray") {
                     fnSprayStylus();
                 }
             }
@@ -175,9 +199,10 @@ Tasks:
 
 <body onload="fnInitialise();">
 <!-- everything in the body section is rendered on the page; in essence this is the "user interface" -->
+<h1>I have the power of god and anime on my side. AHHHHH</h1>
 <div>
     <!-- this container can be used to hold the canvas, techncally this is not needed but its good practice -->
-    <canvas id="cnCanvas" onmousemove="fnTrackMouse(event);" width="500" height="500">
+    <canvas id="cnCanvas" onmousemove="fnTrackMouse(event);" onmouseup="resetDrawings();" width="500" height="500">
         <!-- by adding "event" to the function call means that we will be able to access mouse and keyboard information, really useful!! -->
     </canvas>
 </div>
@@ -186,7 +211,8 @@ Tasks:
     <!-- this container can be used to group all the user's tools -->
     <label for="randomColor">Random Color:</label><input type="checkbox" id="randomColor">
     <label for="colorPicker">Color Picker: </label><input type="color" value="#00ff00" id="colorPicker">
-    <label for="penSize">Pen Size: </label><input type="range" value="5" min="5" max="20" id="penSize" onchange="updatePenSize()">
+    <label for="penSize">Pen Size: </label><input type="range" value="5" min="5" max="20" id="penSize"
+                                                  onchange="updatePenSize()">
     <br/><br/>
 
     <button onclick="setBackground()">Set Background</button>
@@ -200,7 +226,7 @@ Tasks:
     </select>
     <br/><br/>
 
-    <label for="spraySize">Cursor Size: </label><input type="range" id="spraySize" min="5" max="20">
+    <label for="spraySize">Spray Size: </label><input type="range" id="spraySize" min="5" max="50">
 </div>
 
 </body>
