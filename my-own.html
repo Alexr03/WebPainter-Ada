@@ -52,9 +52,9 @@ Tasks:
         let drawings = [];
 
         //declare a variable, a variable can be used to hold information - this variable will be used to hold the HTML canvas and its context (we will be setting it to 2D)
-        var oCanvas, oCanvasContext;
-        var iXPos, iYPos; //declare two variables, these variables will be used to hold the stylus X and Y position
-        var penSize = 5;
+        let oCanvas, oCanvasContext;
+        let iXPos, iYPos; //declare two variables, these variables will be used to hold the stylus X and Y position
+        let penSize = 5;
 
         function fnDebugMessage(sMessage) {
             //this function is used to send messages to the console - this is easier than using the alert() function as is doesnt mean the user has to press a button to continue
@@ -64,8 +64,8 @@ Tasks:
         function getRandomOffset() {
             const spraySize = document.getElementById("spraySize").value;
 
-            var randomAngle = Math.random() * 360;
-            var randomRadius = Math.random() * spraySize;
+            const randomAngle = Math.random() * 360;
+            const randomRadius = Math.random() * spraySize;
 
             return {
                 x: Math.cos(randomAngle) * randomRadius,
@@ -111,7 +111,7 @@ Tasks:
             return document.getElementById("colorPicker").value;
         }
 
-        function fnPaintStylus(e) {
+        function fnPaintStylus() {
             fnDebugMessage("Painting At: x: " + iXPos + ", y: " + iYPos); //show the mouse position
 
             let drawPoint = [];
@@ -164,9 +164,10 @@ Tasks:
             fnDebugMessage("Spraying At: x: " + iXPos + ", y: " + iYPos); //show the mouse position
             oCanvasContext.fillStyle = getColor();
 
-            for (var i = 0; i < 2; i++) {
-                var offset = getRandomOffset();
-                var x = iXPos + offset.x, y = iYPos + offset.y;
+            for (let i = 0; i < document.getElementById("density").value; i++) {
+                const offset = getRandomOffset();
+                const x = iXPos + offset.x;
+                const y = iYPos + offset.y;
 
                 oCanvasContext.fillRect(x, y, penSize, penSize);
             }
@@ -181,10 +182,10 @@ Tasks:
             iYPos = e.clientY - rect.top; //store the current mouse positionY in the Y variable
             fnDebugMessage("Mouse Tracking: x: " + iXPos + ", y: " + iYPos); //show the mouse position
 
-            if (e.buttons == 1) {
+            if (e.buttons === 1) {
                 //this tests the button property (see https://developer.mozilla.org/en-US/docs/Web/Events/mousemove for more information) to see if its TRUE
                 // alert("Left Button Pressed!"); //issue an alert so we can test if this works
-                var tool = document.getElementById("toolOption").value;
+                const tool = document.getElementById("toolOption").value;
                 if (tool === "brush") {
                     fnPaintStylus(e);
                 }
@@ -227,6 +228,7 @@ Tasks:
     <br/><br/>
 
     <label for="spraySize">Spray Size: </label><input type="range" id="spraySize" min="5" max="50">
+    <label for="density">Density: </label><input type="range" id="density" min="2" max="100">
 </div>
 
 </body>
